@@ -6,7 +6,7 @@ Assuming you already installed the Token in your local config:
     $ kubectl get nodes
     $ source <(kubectl completion bash)
 
-Install Rundeck in Kubernetes
+Install i-doit in Kubernetes
 
     $ kubectl create namespace hello-idoit
     $ kubectl config set-context --current --namespace=hello-idoit
