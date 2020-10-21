@@ -83,6 +83,67 @@ spec:
           serviceName: idoit-server
           servicePort: 80
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idoit-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: idoit-db
+  template:
+    metadata:
+      labels:
+        component: idoit-db
+    spec:
+      # Volumes used by some or all containers of the Pod:
+      volumes:
+      - name: "idoit-db"
+        persistentVolumeClaim:
+          claimName: "idoit-db"
+      containers:
+        # docker run --name some-mysql -e
+        # MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+        #
+        # FIXME: Doeas it still hold? With v8.0 it my happen thata the
+        # older clients cannot connect  because of the changed default
+        # by password  hash algo.  Use  v5.7.  The CentOS  based idoit
+        # server container image brings an older mysqladmin and likely
+        # other tools.
+        #
+      - name: idoit-db
+        image: mysql:5.7.30
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: "idoit-db"
+        env:
+        - name: "MYSQL_ROOT_PASSWORD"
+          value: "root"
+          # Let the Idoit Startup Procedure create the DB, avoid
+          # collation issues:
+        # - name: "MYSQL_USER"
+        #   value: "idoit"
+        # - name: "MYSQL_PASSWORD"
+        #   value: "idoit"
+        # - name: "MYSQL_DATABASE"
+        #   value: "idoit"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: idoit-db
+spec:
+  type: ClusterIP
+  selector:
+    component: idoit-db
+  ports:
+  - port: 3306
+    targetPort: 3306
+---
 # https://github.com/rancher/local-path-provisioner
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -96,6 +157,17 @@ spec:
   # the  default one.  Omitted  storageClassName is  not  the same  as
   # storageClassName = "".
   # storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: idoit-db
+spec:
+  accessModes:
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
