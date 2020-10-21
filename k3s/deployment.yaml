@@ -92,6 +92,13 @@ spec:
   selector:
     matchLabels:
       component: idoit-db
+  # Strategy  =  Recreate  instructs  Kubernetes to  not  use  rolling
+  # updates.  Rolling updates  will not work, as you  cannot have more
+  # than one  Pod running at a  time. The Recreate strategy  will stop
+  # the  first  pod  before  creating  a  new  one  with  the  updated
+  # configuration.
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
