@@ -119,14 +119,11 @@ spec:
         # docker run --name some-mysql -e
         # MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
         #
-        # FIXME: Doeas it still hold? With v8.0 it my happen thata the
+        # FIXME: Does it  still hold? With v8.0 it my  happen that the
         # older clients cannot connect  because of the changed default
-        # by password  hash algo.  Use  v5.7.  The CentOS  based idoit
-        # server container image brings an older mysqladmin and likely
-        # other tools.
-        #
+        # for password hash algo. In such cases use :5.7.32
       - name: idoit-db
-        image: mysql:5.7.32
+        image: mysql:8.0.20
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3306
