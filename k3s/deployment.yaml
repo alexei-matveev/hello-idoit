@@ -1,85 +1,93 @@
 #
 # kubectl apply -k .
 #
-# [1] https://hub.docker.com/r/rundeck/rundeck/
-# [2] https://github.com/rundeck/docker-zoo
+# The Images are  about 200M [2].  The php-fpm image  does not seem to
+# bring a proxy and  does not speak http on its  port 9000. The Apache
+# image ist called "legacy" OTOH. It does serve content though.
+#
+# It is unclear if it makes any sense to put that into a volume.  What
+# of that ist supposed to be persistent state?
+#
+#   Each  i-doit  container  has  one default  volume  containing  the
+#   complete  installation  directory: /var/www/html.  This  directory
+#   includes the  source code, cache files,  uploaded files, installed
+#   add-ons, custom translation files, etc.
+#
+# [1] https://github.com/bheisig/i-doit-docker
+# [2] https://hub.docker.com/r/bheisig/idoit
 #
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rundeck-server
+  name: idoit-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      component: rundeck-server
+      component: idoit-server
   template:
     metadata:
       labels:
-        component: rundeck-server
+        component: idoit-server
     spec:
       # Volumes used by some or all containers of the Pod:
       volumes:
-      - name: "rundeck-data"
+      - name: "idoit-data"
         persistentVolumeClaim:
-          claimName: "rundeck-data"
+          claimName: "idoit-data"
       containers:
-      - name: rundeck-server
-        # docker pull rundeck/rundeck
-        # docker run --name some-rundeck -v data:/home/rundeck/server/data rundeck/rundeck
-        image: rundeck/rundeck:3.3.5
+      - name: idoit-server
+        # docker run --name i-doit-apache -p 80:80 bheisig/idoit:1.15-open-php7.4-apache
+        image: bheisig/idoit:1.15-open-php7.4-apache
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 4440
+        - containerPort: 80
         # The simplest way to persist data between container
         # starts/upgrades is to utilize named volumes [2]:
         volumeMounts:
-        - mountPath: "/home/rundeck/server/data"
-          name: "rundeck-data"
-        # FIXME: the first  thing Rundeck does is to  redirect the new
-        # user elsewhere.  Try hardcoding  the Ingress URL  as defined
-        # below:
+        - mountPath: "/unused-idoit-data"
+          name: "idoit-data"
         env:
-        - name: "RUNDECK_GRAILS_URL"
-          value: "http://rundeck.localhost"
+        - name: "XXX"
+          value: "yyy"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rundeck-server
+  name: idoit-server
 spec:
   type: ClusterIP
   selector:
-    component: rundeck-server
+    component: idoit-server
   ports:
   - port: 80
-    targetPort: 4440
+    targetPort: 80
 ---
 #
 # We  assume here  that  *.localhost resolves  to  the local  machine.
 # Following URL should be directed to corresponding Service, also with
 # https:// protocoll:
 #
-#     http://rundeck.localhost
+#     http://idoit.localhost
 #
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: rundeck
+  name: idoit
 spec:
   rules:
-  - host: rundeck.localhost
+  - host: idoit.localhost
     http:
       paths:
       - backend:
-          serviceName: rundeck-server
+          serviceName: idoit-server
           servicePort: 80
 ---
 # https://github.com/rancher/local-path-provisioner
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: rundeck-data
+  name: idoit-data
 spec:
   accessModes:
     - ReadWriteOnce

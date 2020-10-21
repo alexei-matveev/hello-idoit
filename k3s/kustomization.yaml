@@ -1,5 +1,5 @@
 # kubectl apply -k .
-namespace: "hello-rundeck"
+namespace: "hello-idoit"
 namePrefix: ""
 nameSuffix: ""
 resources:
