@@ -123,7 +123,7 @@ spec:
         # older clients cannot connect  because of the changed default
         # for password hash algo. In such cases use :5.7.32
       - name: idoit-db
-        image: mysql:8.0.20
+        image: mysql:8.0.22
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3306
