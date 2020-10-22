@@ -53,7 +53,11 @@ spec:
       containers:
       - name: idoit-server
         # docker run --name i-doit-apache -p 80:80 bheisig/idoit:1.15-open-php7.4-apache
-        image: bheisig/idoit:1.15-open-php7.4-apache
+        #
+        # Version v1.15 has problems linking objects together: Servers
+        # to   Object   Groups,   Servers  to   Services   or   Person
+        # Groups. Neither does v1.14:
+        image: bheisig/idoit:1.14.2-open-php7.4-apache
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -73,7 +77,7 @@ spec:
       initContainers:
       - name: idoit-init
         # FIXME: should be the same as above:
-        image: bheisig/idoit:1.15-open-php7.4-apache
+        image: bheisig/idoit:1.14.2-open-php7.4-apache
         # When  exactly does  a  volume  need (re)initialization?   We
         # simply look if src/ directory exists:
         command: ["sh", "-c", "test -d /d/src || tar cf - -C /var/www/html . | tar xf - -C /d"]
@@ -144,7 +148,7 @@ spec:
         # docker run --name some-mysql -e
         # MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
         #
-        # MySQL v8.0 is not supported as of v1.15.  Use 5.7 ...
+        # MySQL v8.0 is not supported as of v1.15.  Use MySQL 5.7:
       - name: idoit-db
         image: mysql:5.7.32
         imagePullPolicy: IfNotPresent
