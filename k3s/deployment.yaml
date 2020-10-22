@@ -7,17 +7,26 @@
 #
 # When going through the installation specify "root" as the MySQL root
 # password and "idoit-db" as the  hostname for the MySQL server. Cross
-# check below if these comment get out of date.
+# check below if this comment gets out of date.
 #
-# It is unclear if it makes any  sense to put that data into a volume.
-# What of that ist supposed to be persistent state?
+# Note that there  appears to be no simple way  to "reconnect" a fresh
+# pod with unmodified /var/www/html to an existing DB -- the installer
+# insists on dropping the DB.
 #
-#   Each  i-doit  container  has  one default  volume  containing  the
-#   complete  installation  directory: /var/www/html.  This  directory
-#   includes the  source code, cache files,  uploaded files, installed
-#   add-ons, custom translation files, etc.
+# If  you ever  going  to kill  the  Pod  and expect  the  new one  to
+# reconnect to the  existing DB you seem  to need to bring  all of (?)
+# the old  /var/www/html with the src/config.in.php  and whatever else
+# is required. Because of this alone you may want need to persist this
+# data to a volume:
 #
-# There seem to be a generated config.php, maybe more ...
+#     Each  i-doit container  has  one default  volume containing  the
+#     complete installation directory:  /var/www/html.  This directory
+#     includes the source code, cache files, uploaded files, installed
+#     add-ons, custom translation files, etc.
+#
+# Just dont  expect to be able  to keep that data  upon update.  There
+# seem  to be  a  generated src/config.in.php,  what  else is  equally
+# critical?
 #
 # [1] https://github.com/bheisig/i-doit-docker
 # [2] https://hub.docker.com/r/bheisig/idoit
@@ -48,14 +57,30 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
-        # The simplest way to persist data between container
-        # starts/upgrades is to utilize named volumes [2]:
+        # The  simplest   way  to   persist  data   between  container
+        # starts/upgrades is to utilize  named volumes.  You would not
+        # want to keep the old sources on upgrade though.  This volume
+        # *does* contain  the PHP sources,  though.  Thus you  may not
+        # expect updates to work.  You have to start from scratch with
+        # every version change of an  image.  Delete the volume or the
+        # whole namespace and re-create ...
         volumeMounts:
-        - mountPath: "/unused-idoit-data"
+        - mountPath: "/var/www/html"
           name: "idoit-data"
         env:
         - name: "XXX"
           value: "yyy"
+      initContainers:
+      - name: idoit-init
+        # FIXME: should be the same as above:
+        image: bheisig/idoit:1.15-open-php7.4-apache
+        # When  exactly does  a  volume  need (re)initialization?   We
+        # simply look if src/ directory exists:
+        command: ["sh", "-c", "test -d /d/src || tar cf - -C /var/www/html . | tar xf - -C /d"]
+        # command: ["tail", "-f", "/dev/null"]
+        volumeMounts:
+          - mountPath: "/d"
+            name: "idoit-data"
 ---
 apiVersion: v1
 kind: Service
