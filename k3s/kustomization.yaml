@@ -4,3 +4,11 @@ namePrefix: ""
 nameSuffix: ""
 resources:
   - deployment.yaml
+# Version  v1.15 has  problems  linking objects  together: Servers  to
+# Object  Groups,  Servers  to  Services or  Person  Groups.  Same  as
+# v1.14. See if the 1.15.1 helped:
+images:
+  # bheisig/idoit:1.15.1-open-php7.4-apache
+  - name: "bheisig/idoit"
+    newName: "bheisig/idoit"
+    newTag: "1.15.1-open-php7.4-apache"
