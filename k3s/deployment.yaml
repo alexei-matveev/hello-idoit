@@ -55,9 +55,9 @@ spec:
         # docker run --name i-doit-apache -p 80:80 bheisig/idoit:1.15-open-php7.4-apache
         #
         # Version v1.15 has problems linking objects together: Servers
-        # to   Object   Groups,   Servers  to   Services   or   Person
-        # Groups. Neither does v1.14:
-        image: bheisig/idoit:1.14.2-open-php7.4-apache
+        # to Object Groups, Servers to Services or Person Groups. Same
+        # as v1.14. See if the 1.15.1 helped:
+        image: bheisig/idoit:1.15.1-open-php7.4-apache
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -77,7 +77,7 @@ spec:
       initContainers:
       - name: idoit-init
         # FIXME: should be the same as above:
-        image: bheisig/idoit:1.14.2-open-php7.4-apache
+        image: bheisig/idoit:1.15.1-open-php7.4-apache
         # When  exactly does  a  volume  need (re)initialization?   We
         # simply look if src/ directory exists:
         command: ["sh", "-c", "test -d /d/src || tar cf - -C /var/www/html . | tar xf - -C /d"]
