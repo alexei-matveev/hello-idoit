@@ -3,7 +3,9 @@
 #
 # The Images are  about 200M [2].  The php-fpm image  does not seem to
 # bring a proxy and  does not speak http on its  port 9000. The Apache
-# image ist called "legacy" OTOH. It does serve content though.
+# image ist called  "legacy" OTOH.  It does serve  content though. See
+# Ref. [3] how to bootstrap a  separate apache container that talks to
+# php-fpm and serve the static files from the same volume.
 #
 # When going through the installation specify "root" as the MySQL root
 # password and "idoit-db" as the  hostname for the MySQL server. Cross
@@ -30,6 +32,7 @@
 #
 # [1] https://github.com/bheisig/i-doit-docker
 # [2] https://hub.docker.com/r/bheisig/idoit
+# [3] https://github.com/bheisig/i-doit-docker/tree/master/apache
 #
 apiVersion: apps/v1
 kind: Deployment
