@@ -14,3 +14,11 @@ Kubernetes
     $ kubectl apply -k k3s/
 
 Then visit the [URL](https://idoit.localhost).
+
+#### I-doit API
+
+The API is not included, sigh.  See the
+[issue](https://github.com/bheisig/i-doit-docker/issues/6).  And you
+need to register to download it, dont even ask if one can redistribute
+it with a custom image, IANAL.  That and the docs advising against
+direct SQL updates & inserts. So pick your battles.
